@@ -10,7 +10,7 @@ class FileVersion(models.Model):
     file_path = models.fields.CharField(max_length=512)
     file = models.FileField()
     # file = models.FileField(upload_to=get_upload_path)
-    # user = models.ForeignKey('users.User', on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey('users.User', on_delete=models.SET_NULL, null=True)
 
     class Meta:
-        unique_together = ('file_path', 'version_number')
+        unique_together = ('file_path', 'version_number', 'user')
