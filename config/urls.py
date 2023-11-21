@@ -1,11 +1,8 @@
 from django.conf import settings
-from django.conf.urls.static import static
-from django.contrib import admin
-from django.urls import include, path
-from django.views import defaults as default_views
-from django.views.generic import TemplateView
+from django.urls import include, path, re_path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.authtoken.views import obtain_auth_token
+from propylon_document_manager.file_versions.api.views import FileViewSet
 
 # API URLS
 urlpatterns = [
@@ -20,6 +17,7 @@ urlpatterns = [
         SpectacularSwaggerView.as_view(url_name="api-schema"),
         name="api-docs",
     ),
+    re_path(r"^api/file_versions/(?P<path>.*)(\?version=\d+)?$", FileViewSet.as_view({'get': 'get'}), name='file')
 ]
 
 if settings.DEBUG:
