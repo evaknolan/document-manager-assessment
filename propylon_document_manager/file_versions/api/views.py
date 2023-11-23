@@ -43,15 +43,11 @@ class FileViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
     def get(self, request, *args, **kwargs):
         path = kwargs.get('path')
         version = request.GET.get('version') if request.GET.get('version') else 1 #TODO else get latest?
-        file = FileVersion.objects.get(file_path=path, version_number=version, user=request.user)
-        if file:
+        try:
+            file = FileVersion.objects.get(file_path=path, version_number=version, user=request.user)
             file_location = file.file.path
-            try:    
-                with open(file_location, 'r') as f:
-                    file_data = f.read()
-                return Response(file_data, status=status.HTTP_200_OK)
-            except IOError:
-                return Response('file not found', status=status.HTTP_404_NOT_FOUND)
-        else:
+            with open(file_location, 'r') as f:
+                file_data = f.read()
+            return Response(file_data, status=status.HTTP_200_OK)
+        except (IOError, FileVersion.DoesNotExist):
             return Response('file not found', status=status.HTTP_404_NOT_FOUND)
-        

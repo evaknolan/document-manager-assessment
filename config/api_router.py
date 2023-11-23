@@ -9,8 +9,8 @@ if settings.DEBUG:
 else:
     router = SimpleRouter()
 
-router.register("users", UserViewSet)
-router.register("file_versions", FileVersionViewSet)
+router.register("users", UserViewSet, "users")
+router.register("file_versions", FileVersionViewSet, "file_versions")
 
 
 app_name = "api"
