@@ -86,7 +86,12 @@ class FileViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
     def get(self, request, *args, **kwargs):
         path = kwargs.get('path')
         try:
-            file = FileVersion.objects.get(file_path=path, version_number=version, user=request.user)
+            if request.GET.get('version'):
+                file = FileVersion.objects.get(file_path=path, version_number=request.GET.get('version'), user=request.user)
+            else:
+                file = FileVersion.objects.filter(file_path=path, user=request.user).order_by('-version_number').first()
+            if not file:
+                raise FileVersion.DoesNotExist
             file_location = file.file.path
             with open(file_location, 'r') as f:
                 file_data = f.read()

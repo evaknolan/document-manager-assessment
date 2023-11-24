@@ -104,6 +104,16 @@ class TestViews(TestCase):
         self.assertEquals(response.status_code, 200)
         self.assertEquals(response.data, 'updated file contents')
 
+    def test_get_file_version_get_latest_when_version_not_specified(self):
+        new_file_version=SimpleUploadedFile(
+            "test_file.txt",
+            b"updated file contents"
+        )
+        FileVersion.objects.create(file_name='test_file.txt', file_path='documents/files/test_file.txt', user=self.user, version_number=2, file=new_file_version)
+        response = self.auth_client.get('/api/file_versions/documents/files/test_file.txt')
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.data, 'updated file contents')
+
     def test_get_file_non_existant(self):
         response = self.auth_client.get('/api/file_versions/fake/path/test_file.txt')
         self.assertEquals(response.status_code, 404)
