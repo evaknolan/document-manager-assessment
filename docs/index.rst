@@ -12,6 +12,7 @@ Welcome to Propylon Document Manager's documentation!
 
    howto
    users
+   propylon_document_manager.file_versions
 
 
 

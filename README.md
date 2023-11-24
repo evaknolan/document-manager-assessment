@@ -1,14 +1,14 @@
 # Propylon Document Manager Assessment
 
-The Propylon Document Management Technical Assessment is a simple (and incomplete) web application consisting of a basic API backend and a React based client.  This API/client can be used as a bootstrap to implement the specific features requested in the assessment description. 
+The Propylon Document Management Technical Assessment is a simple (and incomplete) web application consisting of a basic API backend and a React based client.  This API/client can be used as a bootstrap to implement the specific features requested in the assessment description.
 
 ## Getting Started
 1. [Install Direnv](https://direnv.net/docs/installation.html)
-2. [Install Pipenv](https://pipenv.pypa.io/en/latest/installation/)
+2. [Install Pipenv](https://pipenv.pypa.io/en/latest/#install-pipenv-today)
 3. This project requires Python 3.11 so you will need to ensure that this version of Python is installed on your OS before building the virtual environment.
 4. `$ cp example.env .envrc`
 5. `$ direnv allow .`
-6. `$ pipenv install -r requirements/local.txt`.  If Python 3.11 is not the default Python version on your system you may need to explicitly create the virtual environment (`$ python3.11 -m venv .venv`) prior to running the install command. 
+6. `$ pipenv install -r requirements/local.txt`.  If Python 3.11 is not the default Python version on your system you may need to explicitly create the virtual environment (`$ python3.11 -m venv .venv`) prior to running the install command.
 7. `$ pipenv run python manage.py migrate` to create the database.
 8. `$ pipenv run python manage.py load_file_fixtures` to create the fixture file versions.
 9. `$ pipenv run python manage.py runserver 0.0.0.0:8001` to start the development server on port 8001.
@@ -22,6 +22,14 @@ The Propylon Document Management Technical Assessment is a simple (and incomplet
 ## Settings
 
 Moved to [settings](http://cookiecutter-django.readthedocs.io/en/latest/settings.html).
+
+## Future Improvements
+
+* Addition of UI for viewing differences in content between file versions.
+
+* Addition of file contents hash to File Version object to prevent creation of multiple File Version objects with the same file contents.
+
+* Addition of pagination to the list File Versions endpoint.
 
 ## Basic Commands
 
