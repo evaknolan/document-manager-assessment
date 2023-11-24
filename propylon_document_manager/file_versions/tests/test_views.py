@@ -23,11 +23,26 @@ class TestViews(TestCase):
             "test_file.txt",
             b"file contents"
         )
+        self.file_version_2=SimpleUploadedFile(
+            "test_file.txt",
+            b"updated file contents"
+        )
         self.file_version_object = FileVersion.objects.create(file_name='test_file.txt', file_path='documents/files/test_file.txt', user=self.user, version_number=1, file=self.file)
 
-        def tearDown(self):
-            FileVersion.objects.all().delete()
-            User.objects.all().delete()
+        self.file_version_2_params={
+            'file_name':'test_file.txt',
+            'file_path':'documents/files/test_file.txt',
+            'user':self.user.id,
+            'file':self.file_version_2
+        }
+
+    def tearDown(self):
+        FileVersion.objects.all().delete()
+        User.objects.all().delete()
+
+    def remove_client_auth(self):
+        self.auth_client.logout()
+        self.auth_client.defaults = {}
 
     def test_list_file_versions(self):
         expected_file = FileVersionSerializer(self.file_version_object).data
@@ -36,22 +51,17 @@ class TestViews(TestCase):
         self.assertEquals(response.data[0], expected_file)
 
     def test_list_file_versions_no_auth(self):
-        self.auth_client.logout()
-        self.auth_client.defaults = {}
+        self.remove_client_auth()
         response = self.auth_client.get(reverse('api:file_versions-list'))
         self.assertEquals(response.status_code, 401)
 
     def test_post_file_versions(self):
-        new_file=SimpleUploadedFile(
-            "new_file.txt",
-            b"file contents"
-        )
         request_data = {
             'file_name':'new_file.txt',
             'file_path':'new/path/new_file.txt',
             'user': self.user.id,
-            'file':new_file
-            }
+            'file':self.file_version_2
+        }
         response = self.auth_client.post(reverse('api:file_versions-list'), request_data)
         file=FileVersion.objects.get(file_path='new/path/new_file.txt', version_number=1, user=self.user.id)
         file_data = FileVersionSerializer(file).data
@@ -59,33 +69,18 @@ class TestViews(TestCase):
         self.assertEquals(response.data, file_data)
 
     def test_post_file_versions_no_auth(self):
-        self.auth_client.logout()
-        self.auth_client.defaults = {}
-        new_file=SimpleUploadedFile(
-            "new_file.txt",
-            b"file contents"
-        )
+        self.remove_client_auth()
         request_data = {
             'file_name':'new_file.txt',
             'file_path':'new/path/new_file.txt',
             'user': self.user.id,
-            'file':new_file
+            'file':self.file_version_2
         }
         response = self.auth_client.post(reverse('api:file_versions-list'), request_data)
         self.assertEquals(response.status_code, 401)
 
     def test_post_file_versions_new_version_of_existing_file(self):
-        new_file_version=SimpleUploadedFile(
-            "test_file.txt",
-            b"updated file contents"
-        )
-        request_data = {
-            'file_name':'test_file.txt',
-            'file_path':'documents/files/test_file.txt',
-            'user': self.user.id,
-            'file': new_file_version
-        }
-        response = self.auth_client.post(reverse('api:file_versions-list'), request_data)
+        response = self.auth_client.post(reverse('api:file_versions-list'), self.file_version_2_params)
         self.assertEquals(response.status_code, 201)
         self.assertEquals(response.data.get('version_number'), 2)
 
@@ -95,21 +90,13 @@ class TestViews(TestCase):
         self.assertEquals(response.data, 'file contents')
 
     def test_get_file_version(self):
-        new_file_version=SimpleUploadedFile(
-            "test_file.txt",
-            b"updated file contents"
-        )
-        FileVersion.objects.create(file_name='test_file.txt', file_path='documents/files/test_file.txt', user=self.user, version_number=2, file=new_file_version)
+        FileVersion.objects.create(file_name='test_file.txt', file_path='documents/files/test_file.txt', user=self.user, version_number=2, file=self.file_version_2)
         response = self.auth_client.get('/api/file_versions/documents/files/test_file.txt?version=2')
         self.assertEquals(response.status_code, 200)
         self.assertEquals(response.data, 'updated file contents')
 
     def test_get_file_version_get_latest_when_version_not_specified(self):
-        new_file_version=SimpleUploadedFile(
-            "test_file.txt",
-            b"updated file contents"
-        )
-        FileVersion.objects.create(file_name='test_file.txt', file_path='documents/files/test_file.txt', user=self.user, version_number=2, file=new_file_version)
+        FileVersion.objects.create(self.file_version_2_params, version_number=2,)
         response = self.auth_client.get('/api/file_versions/documents/files/test_file.txt')
         self.assertEquals(response.status_code, 200)
         self.assertEquals(response.data, 'updated file contents')
@@ -119,7 +106,6 @@ class TestViews(TestCase):
         self.assertEquals(response.status_code, 404)
 
     def test_get_file_no_auth(self):
-        self.auth_client.logout()
-        self.auth_client.defaults = {}
+        self.remove_client_auth()
         response = self.auth_client.get('/api/file_versions/documents/files/test_file.txt')
         self.assertEquals(response.status_code, 401)
